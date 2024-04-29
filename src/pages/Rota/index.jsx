@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import './Rota.css'; // Ensure to create this CSS file for styling
+import './Rota.css';
 
 const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-
 const initialNames = [
   { id: 'name-1', content: 'Alice' },
   { id: 'name-2', content: 'Bob' },
@@ -12,87 +10,66 @@ const initialNames = [
 ];
 
 const Rota = () => {
-  const [names, setNames] = useState(initialNames);
-  const [days, setDays] = useState(daysOfWeek.map(day => ({ id: day, names: [] })));
+  const [names] = useState(initialNames);
+  const [selectedDay, setSelectedDay] = useState({});
+  const [showModal, setShowModal] = useState(false);
+  const [currentDay, setCurrentDay] = useState(null);
+  const [selectedName, setSelectedName] = useState('');
+  const [startTime, setStartTime] = useState('11:00');
+  const [endTime, setEndTime] = useState('11:00');
 
-  const onDragEnd = (result) => {
-   const { source, destination } = result;
+  const handleAddClick = (day) => {
+    setCurrentDay(day);
+    setSelectedName('');
+    setStartTime('11:00');
+    setEndTime('11:00');
+    setShowModal(true);
+  };
 
-   console.log(source);
-   console.log(destination);
-
-   if (!destination) {
-       return;
-   }
-
-   if (source.droppableId === destination.droppableId && source.index === destination.index) {
-       return;
-   }
-
-   const sourceNames = source.droppableId === 'names' ? names : days.find(day => day.id === source.droppableId).names;
-   const finishNames = days.find(day => day.id === destination.droppableId).names;
-   const draggedName = sourceNames[source.index];
-
-   // Create a new ID for the dragged item to ensure uniqueness each time it's used
-   const newName = {
-       ...draggedName,
-       id: `${draggedName.id}-${new Date().getTime()}`
-   };
-
-   // Check if the name already exists in the destination day to avoid duplicates
-   if (!finishNames.some(name => name.content === newName.content)) {
-       const newFinishNames = [...finishNames, newName];
-       const newDays = days.map(day => {
-           if (day.id === destination.droppableId) {
-               return { ...day, names: newFinishNames };
-           }
-           return day;
-       });
-       setDays(newDays);
-   }
-};
-
+  const handleSubmit = () => {
+    const entry = {
+      id: `${currentDay}-${selectedName}`,
+      name: selectedName,
+      startTime: startTime,
+      endTime: endTime === '23:00' ? 'Closing' : endTime
+    };
+    const newEntries = selectedDay[currentDay] ? [...selectedDay[currentDay], entry] : [entry];
+    setSelectedDay({ ...selectedDay, [currentDay]: newEntries });
+    setShowModal(false);
+  };
 
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
-      <Droppable droppableId="names" direction="horizontal">
-        {(provided) => (
-          <div className="names-container" {...provided.droppableProps} ref={provided.innerRef}>
-            {names.map((name, index) => (
-              <Draggable key={name.id} draggableId={name.id} index={index}>
-                {(provided) => (
-                  <div className="name" ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
-                    {name.content}
-                  </div>
-                )}
-              </Draggable>
-            ))}
-            {provided.placeholder}
-          </div>
-        )}
-      </Droppable>
-      {days.map((day, index) => (
-        <Droppable key={day.id} droppableId={day.id}>
-          {(provided) => (
-            <div className="day" ref={provided.innerRef} {...provided.droppableProps}>
-              <h5>{day.id}</h5>
-              <div className="day-names">
-                {day.names.map((name, index) => (
-                  <Draggable key={name.id} draggableId={name.id} index={index}>
-                    {(provided) => (
-                      <div className="name" ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
-                        {name.content}
-                      </div>
-                    )}
-                  </Draggable>
-                ))}
-                {provided.placeholder}
-              </div>
+    <div className="week-container">
+      {daysOfWeek.map(day => (
+        <div key={day} className="day">
+          <div>{day}</div>
+          <button onClick={() => handleAddClick(day)}>+</button>
+          {selectedDay[day] && selectedDay[day].map(entry => (
+            <div key={entry.id} className="name-time">
+              {entry.name} {entry.startTime}-{entry.endTime}
             </div>
-          )}
-        </Droppable>
+          ))}
+        </div>
       ))}
-    </DragDropContext>
+      {showModal && (
+        <div className="modal">
+          <div className="modal-content">
+            <h2>Add Schedule for {currentDay}</h2>
+            <label htmlFor="name-select">Name:</label>
+            <select id="name-select" onChange={(e) => setSelectedName(e.target.value)} value={selectedName}>
+              <option value="">Select a name</option>
+              {names.map(name => <option key={name.id} value={name.content}>{name.content}</option>)}
+            </select>
+            <label htmlFor="start-time">Start Time:</label>
+            <input type="time" id="start-time" min="11:00" max="20:00" step="900" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
+            <label htmlFor="end-time">End Time:</label>
+            <input type="time" id="end-time" min="11:00" max="23:00" step="900" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
+            <button onClick={handleSubmit}>Add</button>
+            <button onClick={() => setShowModal(false)}>Close</button>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 
