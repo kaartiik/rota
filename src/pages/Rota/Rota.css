@@ -1,0 +1,56 @@
+.names-container, .day {
+   display: flex;
+   overflow: auto; /* Allows scrolling on smaller screens */
+   padding: 10px;
+   margin: 10px;
+   border: 1px solid #ccc;
+   border-radius: 8px;
+   background-color: white;
+   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Consistent with the login form styling */
+ }
+ 
+ .name {
+   flex: 0 0 auto; /* Ensures names do not stretch */
+   padding: 8px;
+   margin: 5px;
+   border: 1px solid #007bff;
+   border-radius: 4px;
+   background-color: #e9ecef;
+   cursor: pointer;
+   white-space: nowrap; /* Keeps names on a single line */
+ }
+ 
+ .day {
+   flex-grow: 1; /* Allows days to fill available space */
+   display: flex;
+   flex-direction: column;
+   min-width: 140px; /* Minimum width for each day column */
+ }
+ 
+ .day-names {
+   display: flex;
+   flex-direction: column;
+   padding-top: 10px;
+ }
+ 
+ h5 {
+   text-align: center;
+   color: #007bff; /* Color theme consistent with buttons */
+   margin-bottom: 5px;
+ }
+ 
+ @media (max-width: 768px) {
+   .names-container, .day {
+     flex-direction: column; /* Stack on smaller screens */
+   }
+ 
+   .day-names, .names-container {
+     overflow-x: auto;
+     overflow-y: hidden;
+   }
+ 
+   .name {
+     margin-right: 10px; /* Space between names when horizontally scrolled */
+   }
+ }
+ 
