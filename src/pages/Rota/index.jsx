@@ -86,6 +86,7 @@ const Rota = () => {
           </div>
         </div>
       )}
+      <button onClick={() => console.log('save')}>Save</button>
     </div>
   );
 };
